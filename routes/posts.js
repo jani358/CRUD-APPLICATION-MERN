@@ -1,94 +1,95 @@
+// Importing required modules
 const express = require('express');
-const posts = require('../models/posts');
+const posts = require('../models/posts'); // Importing the posts model
 const Posts = require('../models/posts');
 
-// for http requsts
+// Creating an instance of Express router
 const router = express.Router();
 
-//save posts
-router.post('/post/save',(req,res)=>{
+// Route to handle POST requests for saving a new post
+router.post('/post/save', (req, res) => {
+    // Creating a new post instance with data from request body
     let newPost = new Posts(req.body);
-    newPost.save((err) =>{
-        if(err){
-            return res.status(400).json({
-            });
+
+    // Saving the new post to the database
+    newPost.save((err) => {
+        if (err) {
+            return res.status(400).json({}); // Responding with empty object if there's an error
         }
-        return res.status(200).json({
-            success:"Posts saved successfull"
+        return res.status(200).json({ // Responding with success message if post is saved successfully
+            success: "Posts saved successfully"
         });
     });
 });
 
-//get posts
-//router get is used for n points
-router.get('/posts',(req,res)=>{
-    //the find method is provided by mongoose for (find posts)
-    Posts.find().exec((err,posts)=>{
-        if(err){
+// Route to handle GET requests for retrieving all posts
+router.get('/posts', (req, res) => {
+    // Finding all posts in the database
+    Posts.find().exec((err, posts) => {
+        if (err) {
             return res.status(400).json({
-                error:err
+                error: err // Responding with error message if there's an error
             });
         }
-        //after we received our post without error
-        return res.status(200).json({
-            success:true,
-            existingPosts:posts
+        return res.status(200).json({ // Responding with all existing posts
+            success: true,
+            existingPosts: posts
         });
     });
 });
 
+// Route to handle GET requests for retrieving a specific post by ID
+router.get("/post/:id", (req, res) => {
+    let postId = req.params.id; // Extracting post ID from request parameters
 
-//get a specific post
-router.get("/post/:id",(req,res) =>{
-    let postId = req.params.id;
-
-    Posts.findById(postId,(err,post) =>{
-        if(err){
-            return res.status(400).json({success:false,err});
+    // Finding a post by its ID in the database
+    Posts.findById(postId, (err, post) => {
+        if (err) {
+            return res.status(400).json({ success: false, err }); // Responding with error if post not found
         }
 
-        return res.status(200).json({
-            success:true,
+        return res.status(200).json({ // Responding with the specific post if found
+            success: true,
             post
-        })
+        });
     });
 });
 
-
-//Update posts
-
-router.put('/post/update/:id',(req,res)=>{
+// Route to handle PUT requests for updating a post by ID
+router.put('/post/update/:id', (req, res) => {
+    // Updating a post by its ID with the data from request body
     Posts.findByIdAndUpdate(
         req.params.id,
-        {
-            //full body shoud be update here
-            $set:req.body
-        },
-        (err,post)=>{
-            if(err){
-                return res.status(400).json({error:err});
+        { $set: req.body }, // Updating post fields with new data
+        (err, post) => {
+            if (err) {
+                return res.status(400).json({ error: err }); // Responding with error if update fails
             }
 
-            return res.status(200).json({
-                success:"Updated Succesfully"
+            return res.status(200).json({ // Responding with success message if update is successful
+                success: "Updated Successfully"
             });
         }
     );
 });
 
-// delete post
+// Route to handle DELETE requests for deleting a post by ID
+router.delete('/post/delete/:id', (req, res) => {
+    // Deleting a post by its ID from the database
+    Posts.findByIdAndRemove(req.params.id).exec((err, deletePost) => {
+        if (err) {
+            return res.status(400).json({
+                message: "Delete unsuccessful", // Responding with error message if deletion fails
+                err
+            });
+        }
 
-router.delete('/post/delete/:id',(req,res)=>{
-    Posts.findByIdAndRemove(req.params.id).exec((err,deletePost)=>{
-
-        if(err) return res.status(400).json({
-            message:"Delete unsuccesful",err
-        });
-
-        return res.json({
-            message:"Delete succesfully",deletePost
+        return res.json({ // Responding with success message and deleted post if deletion is successful
+            message: "Delete successful",
+            deletePost
         });
     });
 });
 
+// Exporting the router to be used in other parts of the application
 module.exports = router;
