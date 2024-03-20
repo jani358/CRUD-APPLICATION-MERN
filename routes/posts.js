@@ -79,7 +79,7 @@ router.delete('/post/delete/:id', (req, res) => {
     Posts.findByIdAndRemove(req.params.id).exec((err, deletePost) => {
         if (err) {
             return res.status(400).json({
-                message: "Delete unsuccessful", // Responding with error message if deletion fails
+                message: "Delete unsuccessful", 
                 err
             });
         }
